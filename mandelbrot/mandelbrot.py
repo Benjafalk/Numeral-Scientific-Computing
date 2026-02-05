@@ -6,6 +6,8 @@ Course : Numerical Scientific Computing 2026
 #This is a comment which i need to add
 import numpy as np
 import time
+import matplotlib.pyplot as plt
+
 
 # Task 2
 def mandelbrot_point(c: complex, max_iter: int = 100) -> int:
@@ -88,8 +90,38 @@ def compute_mandelbrot_grid(
     return grid
 
 # Task 4 is in test
+# Result is around 14s
 
 
+
+
+# Task 5, visualize the result using plt
+def plot_mandelbrot(grid, cmap="viridis", filename=None):
+    """
+    Visualize Mandelbrot iteration grid as an image.
+
+    Parameters:
+    grid : 2D numpy array i.e Iteration counts
+    cmap : str which is just a Matplotlib colormap name (hot is just blue/green/yellow ish colors)
+    filename : None (If given, saves image to file which we only do when testing)
+    """
+
+    plt.figure(figsize=(6, 6)) # size of figure
+
+    plt.imshow(grid, cmap=cmap, origin="lower") #origin is 0,0 in left bottom
+    plt.colorbar(label="Iterations")
+
+    plt.title(f"Mandelbrot Set ({cmap} colormap)")
+    plt.xlabel("x")
+    plt.ylabel("y")
+
+    plt.tight_layout()
+
+    if filename is not None:
+        plt.savefig(filename, dpi=150) #size in dpi, higher=better
+        print(f"Saved image to {filename}")
+
+    plt.show()
 
 
 
@@ -126,3 +158,7 @@ if __name__ == "__main__":
 
     print(f"Time: {elapsed:.3f} seconds")
 
+
+    # Task 5 (visualize)
+    print("\nCreating plot, will open in a new window and save")
+    plot_mandelbrot(grid_large, cmap="viridis", filename="mandelbrot_viridis.png")
