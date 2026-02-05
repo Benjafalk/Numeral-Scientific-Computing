@@ -5,7 +5,7 @@ Course : Numerical Scientific Computing 2026
 """
 #This is a comment which i need to add
 import numpy as np
-
+import time
 
 # Task 2
 def mandelbrot_point(c: complex, max_iter: int = 100) -> int:
@@ -87,10 +87,13 @@ def compute_mandelbrot_grid(
 
     return grid
 
+# Task 4 is in test
 
 
 
-# Simple manual test 
+
+
+# Testing setup
 if __name__ == "__main__":
     # Task 2
     # c = 0 should stay bounded and returns max_iter
@@ -107,4 +110,19 @@ if __name__ == "__main__":
     print("Top-left value:", grid[0, 0])
     print("Center value:", grid[50, 50])
 
+    # Task 4 (time performance)
+    print("\nMeasuring performance for 1024x1024 grid...")
+
+    start_time = time.time()
+
+    grid_large = compute_mandelbrot_grid(
+        width=1024,
+        height=1024,
+        max_iter=50
+    )
+
+    end_time = time.time()
+    elapsed = end_time - start_time
+
+    print(f"Time: {elapsed:.3f} seconds")
 
