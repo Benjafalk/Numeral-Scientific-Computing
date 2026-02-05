@@ -13,11 +13,8 @@ packages = [
 ]
 
 for pkg in packages:
-    try:
-        module = __import__(pkg)
-        version = getattr(module, "__version__", "unknown")
-        print(f"{pkg} imported successfully | version: {version}")
-    except Exception as e:
-        print(f"{pkg} FAILED:", e)
+    module = __import__(pkg)
+    version = getattr(module, "__version__", "unknown")
+    print(f"{pkg} imported successfully | version: {version}")
 
 print("-" * 40)
