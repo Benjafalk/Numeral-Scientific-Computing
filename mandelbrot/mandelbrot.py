@@ -4,7 +4,10 @@ Author : Benjamin Falk
 Course : Numerical Scientific Computing 2026
 """
 #This is a comment which i need to add
+import numpy as np
 
+
+# Task 2
 def mandelbrot_point(c: complex, max_iter: int = 100) -> int:
     """
     Compute the escape iteration count for a single complex number c.
@@ -41,12 +44,67 @@ def mandelbrot_point(c: complex, max_iter: int = 100) -> int:
     return max_iter
 
 
+
+
+# Task 3
+def compute_mandelbrot_grid(
+    width: int = 100,
+    height: int = 100,
+    max_iter: int = 50,
+    x_min: float = -2.0,
+    x_max: float = 1.0,
+    y_min: float = -1.5,
+    y_max: float = 1.5,
+):
+    """
+    Compute a grid of Mandelbrot iteration counts.
+
+    We create a rectangular grid in the complex plane and evaluate
+    mandelbrot_point() for every location.
+
+    Parameters:
+    Grid resolution: width, height = int
+    Max iterations per point: max_iter = int
+    Region of the complex plane: x_min, x_max, y_min, y_max = float
+
+    Returns: 2D numpy array of iteration counts
+    """
+
+    # Create mesh of complex numbers (hint from task lmao)
+
+    # Create evenly spaced values along each axis 
+    xs = np.linspace(x_min, x_max, width)
+    ys = np.linspace(y_min, y_max, height)
+
+    # Empty grid to store iteration counts
+    grid = np.zeros((height, width), dtype=int)
+
+    # Loop over all points
+    for j in range(height):
+        for i in range(width):
+            c = complex(xs[i], ys[j])
+            grid[j, i] = mandelbrot_point(c, max_iter)
+
+    return grid
+
+
+
+
 # Simple manual test 
 if __name__ == "__main__":
+    # Task 2
     # c = 0 should stay bounded and returns max_iter
     print("mandelbrot point test, c=0:", mandelbrot_point(0 + 0j, max_iter=50))
 
     # This point escapes quickly and should give 0
     print("mandelbrot point test, c=2+2i:", mandelbrot_point(2 + 2j, max_iter=50))
+
+    # Task 3
+    # Test the small grid actually exists
+    print("\nComputing small Mandelbrot grid (100x100)...")
+    grid = compute_mandelbrot_grid(width=100, height=100, max_iter=50)
+    print("Grid shape:", grid.shape)
+    print("Top-left value:", grid[0, 0])
+    print("Center value:", grid[50, 50])
 
 
