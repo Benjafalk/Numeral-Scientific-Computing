@@ -1,4 +1,5 @@
 import time
+import matplotlib.pyplot as plt
 #Task 1
 import numpy as np
 
@@ -104,4 +105,44 @@ if __name__ == "__main__":
     print("\nFortran-order array:")
     print("Row-sum times (s):", [round(t, 4) for t in t_row_f], " best:", round(min(t_row_f), 4))
     print("Col-sum times (s):", [round(t, 4) for t in t_col_f], " best:", round(min(t_col_f), 4))
+
+    #Task 4 problem size scaling
+
+    print("\nTask 4:")
+    sizes = [256, 512, 1024, 2048, 4096]
+    max_iter = 50
+    repeats = 3
+
+    results = []
+    for s in sizes:
+        C_s = make_complex_grid(s, s)
+
+        _ = mandelbrot_vectorized(C_s, max_iter=5)  # warm-up
+
+        _, t = time_run(mandelbrot_vectorized, C_s, max_iter=max_iter, repeats=repeats)
+        best = min(t)
+        avg = sum(t) / len(t)
+
+        results.append((s, best, avg))
+        print(f"{s}x{s}: best {best:.4f}s, avg {avg:.4f}s")
+
+    t1024 = next((best for (s, best, _) in results if s == 1024), None)
+    t2048 = next((best for (s, best, _) in results if s == 2048), None)
+    if t1024 is not None and t2048 is not None:
+        pred_2048 = 4 * t1024
+        print(f"\nPredict 2048 from 1024 (4x pixels): {pred_2048:.4f}s")
+        print(f"Measured 2048: {t2048:.4f}s")
+        print(f"Ratio measured/pred: {t2048 / pred_2048:.3f}")
+
+    x = [s for (s, _, _) in results]
+    y = [best for (_, best, _) in results]
+
+    # Shows in new window, not like picture which saves
+    plt.figure()
+    plt.plot(x, y, marker="o")
+    plt.xlabel("Grid size (N)")
+    plt.ylabel("Best runtime (s)")
+    plt.title("Mandelbrot scaling (vectorized NumPy)")
+    plt.grid(True)
+    plt.show()
 
