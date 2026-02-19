@@ -1,3 +1,4 @@
+import time
 #Task 1
 import numpy as np
 
@@ -32,10 +33,23 @@ def mandelbrot_vectorized(C: np.ndarray, max_iter: int = 50) -> np.ndarray:
     return M
 
 
+def time_run(fn, *args, repeats=3, **kwargs):
+    times = []
+    for _ in range(repeats):
+        t0 = time.perf_counter()
+        out = fn(*args, **kwargs)
+        t1 = time.perf_counter()
+        times.append(t1 - t0)
+    return out, times
+
 if __name__ == "__main__":
     C = make_complex_grid(1024, 1024)
-    M = mandelbrot_vectorized(C, max_iter=50)
 
-    print("C shape:", C.shape, "dtype:", C.dtype)
-    print("M shape:", M.shape, "dtype:", M.dtype)
-    print("M min/max:", M.min(), M.max())
+    # Warm-up (reduces first-run effects)
+    _ = mandelbrot_vectorized(C, max_iter=10)
+
+    M, times = time_run(mandelbrot_vectorized, C, max_iter=50, repeats=5)
+    print("Vectorized times (s):", [round(t, 4) for t in times])
+    print("Best/avg (s):", round(min(times), 4), "/", round(sum(times)/len(times), 4))
+
+
