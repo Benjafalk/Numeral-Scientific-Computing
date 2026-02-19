@@ -90,7 +90,7 @@ def compute_mandelbrot_grid(
     return grid
 
 # Task 4 is in test
-# Result is around 14s
+# Result is around 4.877s
 
 
 
