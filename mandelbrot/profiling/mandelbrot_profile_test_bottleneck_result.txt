@@ -1,0 +1,40 @@
+File: C:\Users\benja\OneDrive\Documents\GitHub\Numeral-Scientific-Computing\mandelbrot\mandelbrot.py
+Function: mandelbrot_point at line 13
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    13                                           @profile
+    14                                           def mandelbrot_point(c: complex, max_iter: int = 100) -> int:
+    15                                               """
+    16                                               Compute the escape iteration count for a single complex number c.
+    17
+    18                                               We iterate:
+    19                                               z_{n+1} = z_n^2 + c
+    20                                               starting from z_0 = 0.
+    21
+    22                                               If |z| exceeds 2, the sequence will diverge, and we return the
+    23                                               iteration number where that happens. If it never escapes within
+    24                                               max_iter iterations, we return max_iter.
+    25
+    26                                               Parameters:
+    27                                               c: complex
+    28                                               Point in the complex plane.
+    29
+    30                                               max_iter: int
+    31                                               Maximum number of iterations.
+    32
+    33                                               Returns:
+    34                                               int:
+    35                                               Number of iterations before escape, or max_iter if bounded.
+    36                                               """
+    37
+    38    262144      45122.3      0.2      1.4      z = 0 + 0j  # start value
+    39
+    40   3259994     524204.7      0.2     15.7      for n in range(max_iter):
+    41   3213910     865338.2      0.3     26.0          z = z * z + c
+    42
+    43                                                   # Check escape condition |z| > 2 squared
+    44   3213910    1859934.8      0.6     55.8          if (z.real * z.real + z.imag * z.imag) > 4:    %%% bottleneck found (police siren sound)
+    45    216060      32814.8      0.2      1.0              return n
+    46
+    47     46084       6035.0      0.1      0.2      return max_iter
