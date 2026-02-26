@@ -2,6 +2,10 @@
 Mandelbrot Set Generator
 Author : Benjamin Falk
 Course : Numerical Scientific Computing 2026
+
+AI has helped with any and all matplotlib as it it wacky to work with imo
+Tried working with automatic docstring but it was bad (future documents are hand made docstrings)
+Result is in comment on line 97
 """
 #This is a comment which i need to add
 import numpy as np
