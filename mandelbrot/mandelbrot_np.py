@@ -64,6 +64,18 @@ def col_sums_loop(A: np.ndarray) -> float:
         s += np.sum(A[:, j])
     return s
 
+#Usage for lecture 3
+def mandelbrot_numpy(x_min, x_max, y_min, y_max, width, height, max_iter=50):
+    C = make_complex_grid(
+        width=width,
+        height=height,
+        x_min=x_min,
+        x_max=x_max,
+        y_min=y_min,
+        y_max=y_max,
+    )
+    return mandelbrot_vectorized(C, max_iter=max_iter)
+
 
 if __name__ == "__main__":
     # task 1

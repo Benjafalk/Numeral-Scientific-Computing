@@ -123,6 +123,19 @@ def plot_mandelbrot(grid, cmap="viridis", filename=None):
 
     plt.show()
 
+#Usage for lecture 3
+def mandelbrot_naive(x_min, x_max, y_min, y_max, width, height, max_iter=50):
+    return compute_mandelbrot_grid(
+        width=width,
+        height=height,
+        max_iter=max_iter,
+        x_min=x_min,
+        x_max=x_max,
+        y_min=y_min,
+        y_max=y_max,
+    )
+
+
 
 
 # Testing setup

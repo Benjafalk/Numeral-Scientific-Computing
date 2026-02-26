@@ -1,0 +1,41 @@
+==== naive_profile.prof ====
+Thu Feb 26 13:27:13 2026    naive_profile.prof
+
+         262176 function calls in 1.874 seconds
+
+   Ordered by: cumulative time
+   List reduced from 20 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    1.874    1.874 {built-in method builtins.exec}
+        1    0.000    0.000    1.874    1.874 <string>:1(<module>)
+        1    0.000    0.000    1.874    1.874 C:\Users\benja\OneDrive\Documents\GitHub\Numeral-Scientific-Computing\mandelbrot\mandelbrot.py:127(mandelbrot_naive)
+        1    0.279    0.279    1.874    1.874 C:\Users\benja\OneDrive\Documents\GitHub\Numeral-Scientific-Computing\mandelbrot\mandelbrot.py:52(compute_mandelbrot_grid)
+   262144    1.595    0.000    1.595    0.000 C:\Users\benja\OneDrive\Documents\GitHub\Numeral-Scientific-Computing\mandelbrot\mandelbrot.py:13(mandelbrot_point)
+        2    0.000    0.000    0.000    0.000 C:\Users\benja\miniforge3\envs\nsc2026\Lib\site-packages\numpy\_core\function_base.py:26(linspace)
+        1    0.000    0.000    0.000    0.000 {built-in method numpy.zeros}
+        2    0.000    0.000    0.000    0.000 {built-in method numpy.arange}
+        2    0.000    0.000    0.000    0.000 C:\Users\benja\miniforge3\envs\nsc2026\Lib\site-packages\numpy\_core\numeric.py:1964(isscalar)
+        2    0.000    0.000    0.000    0.000 {method 'reshape' of 'numpy.ndarray' objects}
+
+
+
+==== numpy_profile.prof ====
+Thu Feb 26 13:27:13 2026    numpy_profile.prof
+
+         79 function calls in 0.241 seconds
+
+   Ordered by: cumulative time
+   List reduced from 44 to 10 due to restriction <10>
+
+   ncalls  tottime  percall  cumtime  percall filename:lineno(function)
+        1    0.000    0.000    0.241    0.241 {built-in method builtins.exec}
+        1    0.000    0.000    0.241    0.241 <string>:1(<module>)
+        1    0.001    0.001    0.241    0.241 C:\Users\benja\OneDrive\Documents\GitHub\Numeral-Scientific-Computing\mandelbrot\mandelbrot_np.py:68(mandelbrot_numpy)
+        1    0.232    0.232    0.234    0.234 C:\Users\benja\OneDrive\Documents\GitHub\Numeral-Scientific-Computing\mandelbrot\mandelbrot_np.py:16(mandelbrot_vectorized)
+        1    0.004    0.004    0.006    0.006 C:\Users\benja\OneDrive\Documents\GitHub\Numeral-Scientific-Computing\mandelbrot\mandelbrot_np.py:6(make_complex_grid)
+        1    0.000    0.000    0.002    0.002 C:\Users\benja\miniforge3\envs\nsc2026\Lib\site-packages\numpy\lib\_function_base_impl.py:5134(meshgrid)
+        1    0.002    0.002    0.002    0.002 C:\Users\benja\miniforge3\envs\nsc2026\Lib\site-packages\numpy\_core\numeric.py:98(zeros_like)
+        3    0.000    0.000    0.001    0.000 C:\Users\benja\miniforge3\envs\nsc2026\Lib\site-packages\numpy\lib\_function_base_impl.py:5280(<genexpr>)
+        2    0.001    0.001    0.001    0.001 {method 'copy' of 'numpy.ndarray' objects}
+        1    0.000    0.000    0.001    0.001 C:\Users\benja\miniforge3\envs\nsc2026\Lib\site-packages\numpy\lib\_stride_tricks_impl.py:481(broadcast_arrays)
