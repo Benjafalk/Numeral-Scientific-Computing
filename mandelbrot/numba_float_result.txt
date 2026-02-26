@@ -1,9 +1,7 @@
 Mandelbrot Numba dtype test (fully compiled-ish)
 grid: 1024x1024, max_iter: 50
-
-
-float16 (emulated as float32): 0.007s
+float16 (emulated as float32): 0.008s    %We just fake it lmao
 float32: 0.007s
 float64: 0.007s
 
-So we get absolutely 0 difference. How fun!
+Looking at the visual, imma be real: Cant se shit for difference

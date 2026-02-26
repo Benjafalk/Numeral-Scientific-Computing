@@ -8,12 +8,19 @@ Hybrid result: 0.709s
 Fully compiled: 0.006s
 Ratio between the two is 118.5x
 
-By looking at results from others i have 0 clue why mine is so fast if i have done something wrong dunno (i think its because maybe only 50 iterations?)
+By looking at results from others i have 0 clue why mine is so fast if i have done something wrong dunno
+(i think its because maybe only 50 iterations?)
+
+Milestone 4:
+- timing float16/32/64 (float16 not supported here -> emulated as float32)
+- save timings to numba_float_result.txt
+- compare "precision" visually and dump max diffs
 """
 
 import time
 import statistics
 import numpy as np
+import matplotlib.pyplot as plt
 from numba import njit, prange
 
 
@@ -56,7 +63,7 @@ def mandelbrot_naive_numba(xmin, xmax, ymin, ymax, width, height, max_iter=50):
     ys = np.linspace(ymin, ymax, height)
     out = np.empty((height, width), dtype=np.int32)
 
-    # outer loop 
+    # outer loop
     for j in prange(height):
         y = ys[j]
         for i in range(width):
@@ -65,7 +72,7 @@ def mandelbrot_naive_numba(xmin, xmax, ymin, ymax, width, height, max_iter=50):
             zr = 0.0
             zi = 0.0
             it = max_iter
-            
+
             # inner loop
             for n in range(max_iter):
                 zr2 = zr * zr - zi * zi + x
@@ -82,7 +89,7 @@ def mandelbrot_naive_numba(xmin, xmax, ymin, ymax, width, height, max_iter=50):
     return out
 
 
-# 32 and 64 typed versions for milestone 4 (16 is not supported by numba)
+# 32 and 64 typed versions for milestone 4 (16 is not supported by numba here)
 # just copy-pasted versions with small changes
 @njit(parallel=True)
 def mandelbrot_naive_numba_f32(xmin, xmax, ymin, ymax, width, height, max_iter=50):
@@ -91,7 +98,7 @@ def mandelbrot_naive_numba_f32(xmin, xmax, ymin, ymax, width, height, max_iter=5
     out = np.empty((height, width), dtype=np.int32)
 
     four = np.float32(4.0)
-    two  = np.float32(2.0)
+    two = np.float32(2.0)
     zero = np.float32(0.0)
 
     for j in prange(height):
@@ -122,7 +129,7 @@ def mandelbrot_naive_numba_f64(xmin, xmax, ymin, ymax, width, height, max_iter=5
     out = np.empty((height, width), dtype=np.int32)
 
     four = 4.0
-    two  = 2.0
+    two = 2.0
     zero = 0.0
 
     for j in prange(height):
@@ -146,7 +153,6 @@ def mandelbrot_naive_numba_f64(xmin, xmax, ymin, ymax, width, height, max_iter=5
     return out
 
 
-
 def bench(fn, *args, runs=5):
     # extra warmup (jit compile), don't count it
     fn(*args)
@@ -158,6 +164,39 @@ def bench(fn, *args, runs=5):
         times.append(time.perf_counter() - t0)
 
     return statistics.median(times), times
+
+
+def precision_compare_and_plot(xmin, xmax, ymin, ymax, w, h, max_iter=50, out_name="numa_float_visual.png"):
+    # get results
+    r64 = mandelbrot_naive_numba_f64(xmin, xmax, ymin, ymax, w, h, max_iter=max_iter)
+    r32 = mandelbrot_naive_numba_f32(xmin, xmax, ymin, ymax, w, h, max_iter=max_iter)
+
+    # "float16" isn't supported by this numba build, so this is just float32 again
+    r16 = mandelbrot_naive_numba_f32(xmin, xmax, ymin, ymax, w, h, max_iter=max_iter)
+
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4))
+    for ax, result, title in zip(
+        axes,
+        [r16, r32, r64],
+        ["float16 (emulated)", "float32", "float64 (ref)"],
+    ):
+        ax.imshow(result, cmap="hot", origin="lower")
+        ax.set_title(title)
+        ax.axis("off")
+
+    plt.tight_layout()
+    plt.savefig(out_name, dpi=150)
+    plt.close(fig)
+
+    # accuracy diffs (int arrays, but still useful)
+    d32 = np.abs(r32.astype(np.int32) - r64.astype(np.int32)).max()
+    d16 = np.abs(r16.astype(np.int32) - r64.astype(np.int32)).max()
+
+    print(f"saved: {out_name}")
+    print(f"Max diff float32 vs float64: {d32}")
+    print(f"Max diff float16 vs float64: {d16}")
+
+    return d16, d32
 
 
 if __name__ == "__main__":
@@ -178,7 +217,7 @@ if __name__ == "__main__":
     print(f"Full median:   {t_full:.3f}s")
     print(f"Ratio (hybrid/full): {t_hybrid / t_full:.1f}x")
 
-    # milestone 4
+    # milestone 4 dtype timings
     dtypes = [np.float16, np.float32, np.float64]
 
     # compile warmups
@@ -188,10 +227,8 @@ if __name__ == "__main__":
     lines = []
     lines.append("Mandelbrot Numba dtype test (fully compiled-ish)\n")
     lines.append(f"grid: {w}x{h}, max_iter: {max_iter}\n")
-    lines.append("note: this numba install can't do float16 arrays -> float16 is emulated with float32\n\n")
 
-    ##AI helped me format this as i consequently kept messing up the file writing and formatting, also added some extra info to the file for clarity.
-    # Result is in numba_float_result.txt
+
     for dt in dtypes:
         t0 = time.perf_counter()
 
@@ -202,7 +239,6 @@ if __name__ == "__main__":
             mandelbrot_naive_numba_f32(xmin, xmax, ymin, ymax, w, h, max_iter=max_iter)
             label = "float32"
         else:
-            # float16: emulate (we just fake it lmao)
             mandelbrot_naive_numba_f32(xmin, xmax, ymin, ymax, w, h, max_iter=max_iter)
             label = "float16 (emulated as float32)"
 
@@ -217,3 +253,10 @@ if __name__ == "__main__":
         f.writelines(lines)
 
     print("wrote numba_float_result.txt")
+
+    # milestone 4 visual + diff
+    precision_compare_and_plot(
+        xmin, xmax, ymin, ymax, w, h,
+        max_iter=max_iter,
+        out_name="numa_float_visual.png"
+    )
