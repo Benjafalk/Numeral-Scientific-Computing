@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 
 
 # Task 2
-@profile
+#Outcommented the profile decorator as it kept giving error (1)
+#@profile
 def mandelbrot_point(c: complex, max_iter: int = 100) -> int:
     """
     Compute the escape iteration count for a single complex number c.
