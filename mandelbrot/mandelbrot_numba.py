@@ -7,6 +7,8 @@ AI helped a bit with the fully compiled version, some things in the prange loop
 Hybrid result: 0.709s
 Fully compiled: 0.006s
 Ratio between the two is 118.5x
+
+By looking at results from others i have 0 clue why mine is so fast if i have done something wrong dunno (i think its because maybe only 50 iterations?)
 """
 
 import time
