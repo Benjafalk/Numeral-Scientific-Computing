@@ -1,16 +1,29 @@
-# mandelbrot_parallel.py
 import time
 import statistics
 import os
 from multiprocessing import Pool
-
 import numpy as np
 from numba import njit
+
 """
+
+Milestone 1:
+Refactor into 3 functions (pixel, chunk, serial wrapper)
+
 Mostly copy pasted from my numba implementation, but with a parallel worker function and a parallel pool map (from slides)
-Result: serial median: 0.02862190001178533
-Which is close to my L03 result. 
+
+Result of milestone 1:
+1024x1024 and it is split up
+
+Milestone 2:
+add mandelbrot_parallel using multiprocessing Pool.map
+
+copy pasted from slides and changed a bit
+
+Result of milestone 2:
+It matches the serial output 
 """
+
 
 @njit
 def mandelbrot_pixel(c_real, c_imag, max_iter):
@@ -52,6 +65,26 @@ def mandelbrot_serial(N, x_min, x_max, y_min, y_max, max_iter=100):
     return mandelbrot_chunk(0, N, N, x_min, x_max, y_min, y_max, max_iter)
 
 
+def _worker(args):
+    return mandelbrot_chunk(*args)
+
+
+def mandelbrot_parallel(N, x_min, x_max, y_min, y_max, max_iter=100, n_workers=4):
+    chunk_size = max(1, N // n_workers)
+
+    chunks = []
+    row = 0
+    while row < N:
+        row_end = min(row + chunk_size, N)
+        chunks.append((row, row_end, N, x_min, x_max, y_min, y_max, max_iter))
+        row = row_end
+
+    with Pool(processes=n_workers) as pool:
+        pool.map(_worker, chunks)  # warm-up
+        parts = pool.map(_worker, chunks)
+
+    return np.vstack(parts)
+
 
 if __name__ == "__main__":
     N = 1024
@@ -59,13 +92,24 @@ if __name__ == "__main__":
     X_MIN, X_MAX = -2.0, 1.0
     Y_MIN, Y_MAX = -1.5, 1.5
 
-    # warm-up compile
+    # warm-up compile (main process)
     mandelbrot_serial(32, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter=20)
 
-    times = []
-    for _ in range(3):
-        t0 = time.perf_counter()
-        img = mandelbrot_serial(N, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter=max_iter)
-        times.append(time.perf_counter() - t0)
+    # M1: run serial once and check shape
+    img_serial = mandelbrot_serial(N, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter=max_iter)
+    print("serial shape:", img_serial.shape, "dtype:", img_serial.dtype)
 
-    print("serial median:", statistics.median(times))
+    # M2: run parallel and verify it matches serial
+    img_parallel = mandelbrot_parallel(
+        N, X_MIN, X_MAX, Y_MIN, Y_MAX,
+        max_iter=max_iter,
+        n_workers=4
+    )
+
+    print("parallel shape:", img_parallel.shape, "dtype:", img_parallel.dtype)
+    
+    #check if match
+    same = np.array_equal(img_serial, img_parallel)
+    print("matches serial:", same)
+
+ 
