@@ -25,7 +25,7 @@ from numba import njit, prange
 
 
 @njit
-def mandelbrot_point_numba(cre, cim, max_iter=50):
+def mandelbrot_point_numba(cre, cim, max_iter=100):
     zr = 0.0
     zi = 0.0
     for n in range(max_iter):
