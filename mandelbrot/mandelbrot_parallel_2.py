@@ -1,6 +1,5 @@
 import time
 import statistics
-import os
 from multiprocessing import Pool
 
 import numpy as np
@@ -63,15 +62,8 @@ def build_chunks(N, n_chunks, x_min, x_max, y_min, y_max, max_iter):
 
 
 def mandelbrot_parallel(
-    N,
-    x_min,
-    x_max,
-    y_min,
-    y_max,
-    max_iter=100,
-    n_workers=4,
-    n_chunks=None,
-    pool=None,
+    N, x_min, x_max, y_min, y_max,
+    max_iter=100, n_workers=4, n_chunks=None, pool=None
 ):
     if n_chunks is None:
         n_chunks = n_workers
@@ -84,7 +76,7 @@ def mandelbrot_parallel(
 
     tiny = [(0, 8, 8, x_min, x_max, y_min, y_max, max_iter)]
     with Pool(processes=n_workers) as p:
-        p.map(_worker, tiny)   # warm-up in workers
+        p.map(_worker, tiny)
         parts = p.map(_worker, chunks)
 
     return np.vstack(parts)
@@ -92,20 +84,21 @@ def mandelbrot_parallel(
 
 if __name__ == "__main__":
     N = 1024
-    max_iter = 50
-    X_MIN, X_MAX = -2.0, 1.0
-    Y_MIN, Y_MAX = -1.5, 1.5
+    max_iter = 100
+    X_MIN, X_MAX = -2.5, 1.0
+    Y_MIN, Y_MAX = -1.25, 1.25
 
-    # warm-up main process JIT
-    mandelbrot_serial(32, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter=20)
+    # put your best L04 worker count here
+    n_workers = 8
 
-    # M1 check
-    img_serial = mandelbrot_serial(N, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter=max_iter)
+    # warm up JIT in main process
+    mandelbrot_chunk(0, 8, 8, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter)
+
+    # verify output still matches serial
+    img_serial = mandelbrot_serial(N, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter)
     img_parallel = mandelbrot_parallel(
         N, X_MIN, X_MAX, Y_MIN, Y_MAX,
-        max_iter=max_iter,
-        n_workers=4,
-        n_chunks=16
+        max_iter=max_iter, n_workers=n_workers, n_chunks=4 * n_workers
     )
     print("matches serial:", np.array_equal(img_serial, img_parallel))
 
@@ -113,33 +106,41 @@ if __name__ == "__main__":
     times = []
     for _ in range(3):
         t0 = time.perf_counter()
-        mandelbrot_serial(N, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter=max_iter)
+        mandelbrot_serial(N, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter)
         times.append(time.perf_counter() - t0)
     t_serial = statistics.median(times)
 
-    print("\nserial baseline:", t_serial)
+    print(f"\nSerial: {t_serial:.3f}s")
 
-    max_workers = os.cpu_count() or 1
+    # chunk-count sweep
+    tiny = [(0, 8, 8, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter)]
 
-    for n_workers in range(1, max_workers + 1):
-        n_chunks = 4 * n_workers
-        chunks = build_chunks(N, n_chunks, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter)
+    baseline_time = None
+
+    for mult in [1, 2, 4, 8, 16]:
+        n_chunks = mult * n_workers
 
         with Pool(processes=n_workers) as pool:
-            pool.map(_worker, [(0, 8, 8, X_MIN, X_MAX, Y_MIN, Y_MAX, max_iter)])
+            pool.map(_worker, tiny)   # warm-up: load cache in workers
 
             times = []
             for _ in range(3):
                 t0 = time.perf_counter()
-                parts = pool.map(_worker, chunks)
-                _ = np.vstack(parts)
+                mandelbrot_parallel(
+                    N, X_MIN, X_MAX, Y_MIN, Y_MAX,
+                    max_iter=max_iter,
+                    n_workers=n_workers,
+                    n_chunks=n_chunks,
+                    pool=pool
+                )
                 times.append(time.perf_counter() - t0)
 
         t_par = statistics.median(times)
-        speedup = t_serial / t_par
-        eff = speedup / n_workers * 100.0
 
-        print(
-            f"{n_workers:2d} workers, {n_chunks:3d} chunks: "
-            f"{t_par:.3f}s, speedup={speedup:.2f}x, eff={eff:.0f}%"
-        )
+        if baseline_time is None:
+            baseline_time = t_par
+
+        lif = n_workers * t_par / t_serial - 1
+        vs_1x = baseline_time / t_par
+
+        print(f"{n_chunks:4d} chunks   {t_par:.3f}s   {vs_1x:.2f}x   LIF={lif:.2f}")
