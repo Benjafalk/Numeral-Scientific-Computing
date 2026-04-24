@@ -1,0 +1,11 @@
+Table:
+
+     | Time |
+Type | 
+_____|_______
+Naive|  4,877
+_____|_______
+Numpy| 0,68s
+_____|_______
+Numba| 0.7s  (hybrid)
+Numba| 0.006s (fully)

@@ -1,0 +1,25 @@
+1:  cProfile on naive vs NumPy: How many functions appear in each profile? What does this difference tell you about where the work actually happens?
+Naive: 20 functions show up (262,176 calls total).
+NumPy: 44 functions show up (79 calls total), but most time is basically in one call into NumPy.
+This means that in the naive version the work is happening in Python code and the NumPy version the work happens mostly in compiled NumPy internals, 
+so Python only makes a handful of calls and then hands off the heavy lifting to NymPy.
+
+
+2: line profiler on naive: Which lines dominate runtime? What fraction of total time is spent in the inner loop?
+The runtime is dominated by:
+if (z.real*z.real + z.imag*z.imag) > 4:   %This line is 55.8%
+z = z*z + c     %This line is 26%
+
+the "for n in range(max_iter):" loop overhead itself is 15.7%
+So basically the inner loop is 97.5% of the time
+
+
+3: Based on your profiling results: why is NumPy faster than naive Python?
+Because it avoids doing millions of Python-level iterations. The naive version spends almost all its time stepping z = z*z + c and checking escape in Python. 
+NumPy pushes that work into C loops so the interpreter overhead mostly disappears.
+
+
+4: What would you need to change to make the naive version faster? (hint: what does line profiler tell you about the inner loop?)
+We need to get rid of the Python inner loop cost. The line profiler makes it obvious: the hot spot is the per-iteration update + escape check. 
+So two options:
+compile that loop (Numba on mandelbrot_point / whole grid loop) or rewrite it so the iteration happens in vectorized / NumPY.
