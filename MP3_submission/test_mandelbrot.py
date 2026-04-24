@@ -10,7 +10,7 @@ from mandelbrot_numba import (
     mandelbrot_naive_numba_f32,
     mandelbrot_naive_numba_f64,
 )
-
+    
 
 @pytest.mark.parametrize(
     "cre, cim, max_iter, expected",
